@@ -2,9 +2,13 @@
 #to use without a display: sudo apt install xvfb
 #then: xvfb-run -a python3 run.py <MessengerID> [Browser]
 
+#https://askubuntu.com/questions/661186/how-to-install-previous-firefox-version
+#sudo apt-get install firefox=75.0+build3-0ubuntu1
+
 import os
 import sys
 import time
+import signal
 import subprocess
 
 
@@ -21,8 +25,9 @@ print('Note: Make sure you log into Messenger if you are promped to.')
 #https://stackoverflow.com/questions/7032212/how-to-run-application-with-parameters-in-python
 #https://stackoverflow.com/questions/31164253/how-to-open-url-in-microsoft-edge-from-the-command-line
 #https://stackoverflow.com/questions/1196074/how-to-start-a-background-process-in-python
+#https://superuser.com/questions/731467/command-line-option-to-open-chrome-in-new-window-and-move-focus
 funcs = {
-    'nt': lambda: subprocess.Popen(['explorer.exe', 'microsoft-edge:' + url]),
+    'nt': lambda: subprocess.Popen([browser or 'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe', '-new-window', url]),
     'posix': lambda: subprocess.Popen([browser or 'firefox', url]),
 }
 tips = {
@@ -34,14 +39,20 @@ if func is None:
     print('Error: Unsupported OS: ' + os.name)
     exit(1)
 
-try:
-    proc = func()
-except:
-    print('Error: An exception occured while attempting to open a browser. ' + tips[os.name])
-    print('')
-    raise
 
-print('\nBrowser Started.')
+print('\nBot Started.')
 
+i = 0
 while True:
-    time.sleep(1)
+    i += 1
+    try:
+        print('\rRestarting browser: ' + str(i), end='')
+        proc = func()
+        time.sleep(10)
+        proc.kill()
+        #Windows, Windows...
+        if os.name == 'nt' and browser is None: subprocess.run(['taskkill', '-f', '-im', 'msedge.exe'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    except:
+        print('Error: An exception occured while attempting to open a browser. ' + tips[os.name])
+        print('')
+        raise
