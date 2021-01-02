@@ -29,7 +29,7 @@ from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 
 LOAD_DELAY = 4 #the delay in seconds to load a webpage
-REFRESH_DELAY = 10 #the delay in seconds between each page refesh
+REFRESH_DELAY = 60 #the delay in seconds between each page refesh
 MESSENGER_LOGIN = 'https://messenger.com/login/' #the login url
 MESSENGER_REDIRECT = 'https://www.messenger.com/t/' #the redirection url
 USER_SELECTOR = '#email' #the username input box selector
