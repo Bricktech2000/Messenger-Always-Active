@@ -5,54 +5,51 @@
 #https://askubuntu.com/questions/661186/how-to-install-previous-firefox-version
 #sudo apt-get install firefox=75.0+build3-0ubuntu1
 
+#download chrome webdriver from:
+#sites.google.com/a/chromium.org/chromedriver/home
+
 import os
 import sys
 import time
-import signal
-import subprocess
+from selenium import webdriver
+from selenium.common.exceptions import NoSuchElementException
+
+LOAD_DELAY = 2 #the delay in seconds to load a webpage
+REFRESH_DELAY = 10 #the delay in seconds between each page refesh
+MESSENGER_LOGIN = 'https://messenger.com/login/' #the login url
+MESSENGER_REDIRECT = 'https://www.messenger.com/t/' #the redirection url
+USER_SELECTOR = '#email' #the username input box selector
+PASS_SELECTOR = '#email' #the password input box selector
+SUBMIT_SELECTOR = '#loginbutton' #the submit button selector
 
 
-if len(sys.argv) < 2 or len(sys.argv) > 3:
-    print('Error: Usage: run.py <MessengerID> [Browser]')
+if len(sys.argv) != 4:
+    print('Error: Usage: run.py <username> <password> <chatID>')
     exit(1)
-id = sys.argv[1]
-browser = None
-if len(sys.argv) == 3: browser = sys.argv[2]
-url = 'https://www.messenger.com/t/' + id
+username = sys.argv[1]
+password = sys.argv[2]
+id = sys.argv[3]
 
-print('Note: Make sure you log into Messenger if you are promped to.')
+#https://chromedriver.chromium.org/getting-started
+driver = webdriver.Chrome()
+driver.get(MESSENGER_LOGIN)
+time.sleep(LOAD_DELAY)
 
-#https://stackoverflow.com/questions/7032212/how-to-run-application-with-parameters-in-python
-#https://stackoverflow.com/questions/31164253/how-to-open-url-in-microsoft-edge-from-the-command-line
-#https://stackoverflow.com/questions/1196074/how-to-start-a-background-process-in-python
-#https://superuser.com/questions/731467/command-line-option-to-open-chrome-in-new-window-and-move-focus
-funcs = {
-    'nt': lambda: subprocess.Popen([browser or 'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe', '-new-window', url]),
-    'posix': lambda: subprocess.Popen([browser or 'firefox', url]),
-}
-tips = {
-    'nt': 'Make sure Microsoft Edge is installed',
-    'posix': 'Make sure Mozilla Firefox is installed. If you wish to use a different browser, provide it as a third commandline argument.'
-}
-func = funcs.get(os.name)
-if func is None:
-    print('Error: Unsupported OS: ' + os.name)
-    exit(1)
+usernameInput = driver.find_element_by_css_selector(USER_SELECTOR)
+passwordInput = driver.find_element_by_css_selector(PASS_SELECTOR)
+submitButton = driver.find_element_by_css_selector(SUBMIT_SELECTOR)
+#https://stackoverflow.com/questions/38521136/python-selenium-attributeerror-webelement-object-has-no-attribute-sendkeys
+usernameInput.send_keys(username)
+passwordInput.send_keys(password)
+submitButton.click()
+time.sleep(LOAD_DELAY)
 
+driver.get(MESSENGER_REDIRECT + id)
 
-print('\nBot Started.')
-
-i = 0
-while True:
-    i += 1
-    try:
-        print('\rRestarting browser: ' + str(i), end='')
-        proc = func()
-        time.sleep(10)
-        proc.kill()
-        #Windows, Windows...
-        if os.name == 'nt' and browser is None: subprocess.run(['taskkill', '-f', '-im', 'msedge.exe'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    except:
-        print('Error: An exception occured while attempting to open a browser. ' + tips[os.name])
-        print('')
-        raise
+try:
+    while True:
+        driver.refresh()
+        time.sleep(REFRESH_DELAY)
+except KeyboardInterrupt:
+    driver.quit()
+    raise
