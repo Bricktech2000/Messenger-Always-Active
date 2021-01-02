@@ -2,11 +2,30 @@
 #to use without a display: sudo apt install xvfb
 #then: xvfb-run -a python3 run.py <MessengerID> [Browser]
 
-#https://askubuntu.com/questions/661186/how-to-install-previous-firefox-version
-#sudo apt-get install firefox=75.0+build3-0ubuntu1
-
 #download chrome webdriver from:
 #sites.google.com/a/chromium.org/chromedriver/home
+
+#for linux:
+#sudo apt-get install unzip
+#wget https://chromedriver.storage.googleapis.com/87.0.4280.88/chromedriver_linux64.zip
+#unzip chromedriver_linux64.zip
+#rm chromedriver_linux64.zip
+#//https://stackoverflow.com/questions/22558077/unknown-error-chrome-failed-to-start-exited-abnormally-driver-info-chromedri
+#//https://stackoverflow.com/questions/41144934/cannot-find-chrome-binary-when-executing-a-selenium-testng-test-in-jenkins-on/41145375
+#//https://zoomadmin.com/HowToInstall/UbuntuPackage/yum
+#//sudo apt-get update
+#//sudo apt-get install yum
+#//wget https://dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm
+#//sudo yum install ./google-chrome-stable_current_*.rpm
+#https://itsfoss.com/install-chrome-ubuntu/
+#wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+#sudo dpkg -i google-chrome-stable_current_amd64.deb
+#https://stackoverflow.com/questions/22558077/unknown-error-chrome-failed-to-start-exited-abnormally-driver-info-chromedri
+#Xvfb :99 -ac -screen 0 1280x1024x24 &
+#export DISPLAY=:99
+
+#for windows:
+#I hate windows CMD just download and unzip manually
 
 import os
 import sys
@@ -14,13 +33,14 @@ import time
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 
-LOAD_DELAY = 2 #the delay in seconds to load a webpage
+LOAD_DELAY = 4 #the delay in seconds to load a webpage
 REFRESH_DELAY = 10 #the delay in seconds between each page refesh
 MESSENGER_LOGIN = 'https://messenger.com/login/' #the login url
 MESSENGER_REDIRECT = 'https://www.messenger.com/t/' #the redirection url
 USER_SELECTOR = '#email' #the username input box selector
-PASS_SELECTOR = '#email' #the password input box selector
+PASS_SELECTOR = '#pass' #the password input box selector
 SUBMIT_SELECTOR = '#loginbutton' #the submit button selector
+WRONG_PASS_ELEMENT = '#login_form > div._3403._3404' #the HTML element that appears when a wrong password is submitted
 
 
 if len(sys.argv) != 4:
@@ -30,8 +50,11 @@ username = sys.argv[1]
 password = sys.argv[2]
 id = sys.argv[3]
 
+print('username: ' + username)
+print('password: ' + password)
+
 #https://chromedriver.chromium.org/getting-started
-driver = webdriver.Chrome()
+driver = webdriver.Chrome('./chromedriver.exe')
 driver.get(MESSENGER_LOGIN)
 time.sleep(LOAD_DELAY)
 
@@ -44,12 +67,15 @@ passwordInput.send_keys(password)
 submitButton.click()
 time.sleep(LOAD_DELAY)
 
+try:
+    error = driver.find_element_by_css_selector(WRONG_PASS_ELEMENT)
+    print('Login Error: ' + error.get_attribute('innerText'))
+    exit(0)
+except NoSuchElementException:
+    pass
+
 driver.get(MESSENGER_REDIRECT + id)
 
-try:
-    while True:
-        driver.refresh()
-        time.sleep(REFRESH_DELAY)
-except KeyboardInterrupt:
-    driver.quit()
-    raise
+while True:
+    driver.refresh()
+    time.sleep(REFRESH_DELAY)
