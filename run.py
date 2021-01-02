@@ -1,6 +1,6 @@
 #https://unix.stackexchange.com/questions/9107/how-can-i-run-firefox-on-linux-headlessly-i-e-without-requiring-libgtk-x11-2-0
 #to use without a display: sudo apt install xvfb
-#then: xvfb-run -a python3 run.py <MessengerID> [Browser]
+#then: xvfb-run -a python3 run.py ...
 
 #download chrome webdriver from:
 #sites.google.com/a/chromium.org/chromedriver/home
@@ -20,6 +20,7 @@
 #https://itsfoss.com/install-chrome-ubuntu/
 #wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
 #sudo dpkg -i google-chrome-stable_current_amd64.deb
+#rm google-chrome-stable_current_amd64.deb
 #https://stackoverflow.com/questions/22558077/unknown-error-chrome-failed-to-start-exited-abnormally-driver-info-chromedri
 #Xvfb :99 -ac -screen 0 1280x1024x24 &
 #export DISPLAY=:99
@@ -50,14 +51,16 @@ username = sys.argv[1]
 password = sys.argv[2]
 id = sys.argv[3]
 
-print('username: ' + username)
-print('password: ' + password)
+print('Username: ' + username)
+print('Password: ' + password)
 
+print('Booting Chrome Driver...')
 #https://chromedriver.chromium.org/getting-started
 driver = webdriver.Chrome('./chromedriver.exe')
 driver.get(MESSENGER_LOGIN)
 time.sleep(LOAD_DELAY)
 
+print('Logging in...')
 usernameInput = driver.find_element_by_css_selector(USER_SELECTOR)
 passwordInput = driver.find_element_by_css_selector(PASS_SELECTOR)
 submitButton = driver.find_element_by_css_selector(SUBMIT_SELECTOR)
@@ -75,6 +78,8 @@ except NoSuchElementException:
     pass
 
 driver.get(MESSENGER_REDIRECT + id)
+
+print('Bot Running.')
 
 while True:
     driver.refresh()
