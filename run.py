@@ -10,13 +10,6 @@
 #wget https://chromedriver.storage.googleapis.com/87.0.4280.88/chromedriver_linux64.zip
 #unzip chromedriver_linux64.zip
 #rm chromedriver_linux64.zip
-#//https://stackoverflow.com/questions/22558077/unknown-error-chrome-failed-to-start-exited-abnormally-driver-info-chromedri
-#//https://stackoverflow.com/questions/41144934/cannot-find-chrome-binary-when-executing-a-selenium-testng-test-in-jenkins-on/41145375
-#//https://zoomadmin.com/HowToInstall/UbuntuPackage/yum
-#//sudo apt-get update
-#//sudo apt-get install yum
-#//wget https://dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm
-#//sudo yum install ./google-chrome-stable_current_*.rpm
 #https://itsfoss.com/install-chrome-ubuntu/
 #wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
 #sudo dpkg -i google-chrome-stable_current_amd64.deb
@@ -31,6 +24,7 @@
 import os
 import sys
 import time
+import ctypes
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 
@@ -50,6 +44,17 @@ if len(sys.argv) != 4:
 username = sys.argv[1]
 password = sys.argv[2]
 id = sys.argv[3]
+
+#https://stackoverflow.com/questions/63741649/chrome-crashes-when-running-selenium-python3-script-as-sudo
+#https://stackoverflow.com/questions/1026431/cross-platform-way-to-check-admin-rights-in-a-python-script-under-windows
+try:
+ is_admin = os.getuid() == 0
+except AttributeError:
+ is_admin = ctypes.windll.shell32.IsUserAnAdmin() != 0
+
+if is_admin:
+    print('Error: Chrome Webdriver will crash if this program is run as root.')
+    exit(0)
 
 print('Username: ' + username)
 print('Password: ' + password)
