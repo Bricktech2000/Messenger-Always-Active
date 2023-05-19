@@ -1,17 +1,14 @@
-Messenger Always Active
-=======================
+# Messenger Always Active
 
-A simple bot to keep your Messenger activity status to 'Active' all the time
+_A simple bot to keep your Messenger activity status to 'Active' all the time_
 
-Requirements
-------------
+## Requirements
 
-* A Windows or Linux machine
-* Python 3.5+
-* Selenium with the Chrome Webdriver in `PATH`
+- A Windows or Linux machine
+- Python 3.5+
+- Selenium with the Chrome Webdriver in `PATH`
 
-Usage
------
+## Usage
 
 ```bash
 python run.py <username> <password> <chatID>
